@@ -24,18 +24,26 @@ astronauta.rect.y = 32
 
 alien_verde.rect.x = 288
 alien_verde.rect.y = 224
+alien_verde.image = pygame.image.load("Imagenes/Alien verde.png").convert()
+alien_verde.image.set_colorkey((0, 0, 0))
 
 alien_rojo.rect.x = 288
 alien_rojo.rect.y = 352
+alien_rojo.image = pygame.image.load("Imagenes/Alien rojo.png").convert()
+alien_rojo.image.set_colorkey((0, 0, 0))
 
 alien_azul.rect.x = 384
 alien_azul.rect.y = 224
+alien_azul.image = pygame.image.load("Imagenes/Alien azul.png").convert()
+alien_azul.image.set_colorkey((0, 0, 0))
 
 alien_rosa.rect.x = 384
 alien_rosa.rect.y = 352
-
+alien_rosa.image = pygame.image.load("Imagenes/Alien rosa.png").convert()
+alien_rosa.image.set_colorkey((0, 0, 0))
 # lista de los bloques y sprites para la funcion dibujar
 block_list = pygame.sprite.Group()
+block_list_esferas = pygame.sprite.Group()
 movingsprites = pygame.sprite.Group()
 # cargamos astronauta y aliens
 movingsprites.add(astronauta)
@@ -45,29 +53,56 @@ movingsprites.add(alien_azul)
 movingsprites.add(alien_rosa)
 
 # cargamos mapa
-y = 0
+
 # recorremos la matriz del mapa y creamos los objetos de los bloques para dibujarlos despues
-for row in game_map:
-    x = 0
-    for tile in row:
-        if tile == '0':
-            espacio = Espacio()
-            espacio.rect.x = x*32
-            espacio.rect.y = y*32
-            block_list.add(espacio)
-        if tile == '1':
-            piso = Piso()
-            piso.rect.x = x*32
-            piso.rect.y = y*32
-            block_list.add(piso)
-        x += 1
-    y += 1
+def reiniciar_objetos_mapa():
+    y = 0
 
+    for row in game_map:
+        x = 0
+        for tile in row:
+            if tile == '0':
+                espacio = Espacio()
+                espacio.rect.x = x*32
+                espacio.rect.y = y*32
+                block_list.add(espacio)
+            if tile == '1':
+                esfera = Esfera()
+                esfera.rect.x = x*32
+                esfera.rect.y = y*32
+                block_list.add(esfera)
+                block_list_esferas.add(esfera)
+            if tile == '2':
+                piso = Piso()
+                piso.rect.x = x*32
+                piso.rect.y = y*32
+                block_list.add(piso)
+            x += 1
+        y += 1
+
+reiniciar_objetos_mapa()
 # se le pasa una coordenada (x,y) y te dice si esta es una coordenada de pared
+def contar_esferas():
+    y = 0
+    esferas = 0
+    for row in game_map:
+        x = 0
+        for tile in row:
+            if tile == '1':
+                esferas +=1
 
+            x += 1
+        y += 1
+    return esferas
 
 def colision_pared(x, y):
     if game_map[int((y)/32)][int((x)/32)] == '0':
+        return True
+    else:
+        return False
+
+def colision_esfera(x, y):
+    if game_map[int((y)/32)][int((x)/32)] == '1':
         return True
     else:
         return False
@@ -92,7 +127,16 @@ def cambio_intersección(x, y):
         if caminos >= 3:
             return True
     return False
-
+#COmprobamos si el jugador colisiono con un alien
+def colision_alien(astronauta, alien):
+    alien_posx = alien.rect.x
+    alien_posy = alien.rect.y
+    astronauta_posx = astronauta.rect.x
+    astronauta_posy = astronauta.rect.y
+    if alien_posy == astronauta_posy and alien_posx == astronauta_posx:
+        return True
+    else:
+        return False
 
 def mover_alien(alien):
     # variables para regresar a la posición anterior si el movimiento causo una colision con la pared
@@ -117,7 +161,7 @@ def mover_alien(alien):
         alien.dir_mov = 0
 
 
-while not done:
+while not done and contar_esferas()>=1:
     # Quitamos el juego al presiona x en la ventana
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -138,6 +182,16 @@ while not done:
             if colision_pared(astronauta.rect.x, astronauta.rect.y):
                 astronauta.rect.x = posx
                 astronauta.rect.y = posy
+            #comprobamos colisones
+
+
+            #comprobamos que astronauta recoja esferas
+            if colision_esfera(astronauta.rect.x, astronauta.rect.y):
+                game_map[int((astronauta.rect.y)/32)][int((astronauta.rect.x)/32)] = '2'
+        
+
+    block_list = pygame.sprite.Group()     
+    reiniciar_objetos_mapa()               
     screen.fill(WHITE)
     # dibujamos mapa
     block_list.draw(screen)
@@ -146,7 +200,10 @@ while not done:
     mover_alien(alien_rojo)
     mover_alien(alien_azul)
     mover_alien(alien_rosa)
+    if colision_alien(astronauta, alien_verde) or colision_alien(astronauta, alien_rojo) or colision_alien(astronauta, alien_azul) or colision_alien(astronauta, alien_rosa) :
+        done = True
     # dibujamos sprites
     movingsprites.draw(screen)
     pygame.display.flip()
-    clock.tick(5)
+    clock.tick(4)
+print("Fin del juego")

@@ -57,6 +57,12 @@ class Espacio(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
 
+class Esfera(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('Imagenes/Esfera.png').convert()
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
 
 class Astronauta(pygame.sprite.Sprite):
 
