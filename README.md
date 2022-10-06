@@ -10,6 +10,6 @@ Proyecto creado para aprender los fundamentos de python, gamedev, OOP y pygame
 ```
 python main.py
 ```
-![Alt text](./imagenes/juego.png?raw=false "Juego")
+![Alt text](./Imagenes/juego.png?raw=false "Juego")
 
 
